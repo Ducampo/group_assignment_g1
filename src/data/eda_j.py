@@ -30,6 +30,14 @@ r_train_eda_df.isnull().sum()
 r_train_eda_df["title"][65909]
 print(r_train_eda_df.iloc[65909])
 
+""" 
+!important Note:
+- Not all text is in english, we may be able to get the language from the papers based on their publisher? (language not constant within publisher)
+- publisher names are not always imputed the same way (Need to be cleaned)
+- !important Some publishers have the year of publication in the name
+"""
+print(r_train_eda_df["publisher"].unique())
+r_train_eda_df[["publisher"]].value_counts()
 
 # imbalance distribution most of the data is from 2010 to 2020
 print(r_train_eda_df["year"])
@@ -50,9 +58,14 @@ print(train_df["abstract"].isnull().sum())
 train_df["title_len"] = train_df["title"].apply(lambda x: len(x))
 train_df["abstract_len"] = train_df["abstract"].apply(lambda x: len(x))
 train_df.info()
-
 # Value range for columns ['title','abstract']
 print(train_df["title_len"].max())
 print(train_df["title_len"].min())
 print(train_df["abstract_len"].max())
 print(train_df["abstract_len"].min())
+
+# add lowercase columns of interest ['title', 'publisher', 'abstract']
+train_df["title_low"] = train_df["title"].str.lower()
+train_df["publisher_low"] = train_df["publisher"].str.lower()
+train_df["abstract_low"] = train_df["abstract"].str.lower()
+train_df.head(20)

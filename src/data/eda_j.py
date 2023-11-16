@@ -129,4 +129,4 @@ train_df["title_n_stop_en_len"] = train_df["title_n_stop_en"].apply(lambda x: le
 train_df.info()
 
 # extract preprocess train data as .json format
-# train_df.to_json('pre_train_df_j.json', orient='records', lines=True)
+# train_df.to_json('pre_train_df_j.json', orient='records', lines=False)

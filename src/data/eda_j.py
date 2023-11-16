@@ -107,6 +107,12 @@ def drop_punctuation(text):
     return text.translate(str.maketrans("", "", string.punctuation))
 
 
+"""
+Example of what drop_punctuation() fucntion does:
+"""
+# example_punctuation = "All the people working in Tilburg, Breda like to bike during the weekend. But not during/in the week-en."
+# drop_punctuation(example_stopwords)
+
 train_df["title_pre"] = train_df["title_low"].apply(lambda x: drop_punctuation(x))
 train_df["title_pre_len"] = train_df["title_pre"].apply(lambda x: len(x))
 # train_df.head(2)
@@ -122,6 +128,12 @@ def remove_stopwords(text):
             removed.append(tokens[i])
     return " ".join(removed)
 
+
+"""
+Example of what remove_stopwords() fucntion does
+"""
+# example_stopwords = "All the people working in Tilburg, Breda like to bike during the weekend. But not during/in the week-en."
+# remove_stopwords(example_stopwords)
 
 train_df["title_n_stop_en"] = train_df["title_pre"].apply(lambda x: remove_stopwords(x))
 train_df["title_n_stop_en_len"] = train_df["title_n_stop_en"].apply(lambda x: len(x))

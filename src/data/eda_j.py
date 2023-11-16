@@ -1,13 +1,22 @@
 # %matplotlib inline # in case of working with jupyter notebook.
 
 
+# %matplotlib inline # in case of working with jupyter notebook.
+
+
 # import required libraries
 
 import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import string
 import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+nltk.download("stopwords")
+nltk.download("punkt")
 
 
 # Declare document variables, make sure to update relative paths to match local file location
@@ -28,7 +37,6 @@ r_train_eda_df.info()
 r_train_eda_df.isnull().sum()
 r_train_eda_df["title"][65909]
 print(r_train_eda_df.iloc[65909])
-
 
 
 ## Descriptive analysis training dataset
@@ -81,3 +89,44 @@ train_df["title_low"] = train_df["title"].str.lower()
 train_df["publisher_low"] = train_df["publisher"].str.lower()
 train_df["abstract_low"] = train_df["abstract"].str.lower()
 train_df.head(20)
+
+"""
+Adding new temporary features:
+Title text preprocessing to reduce dimmensionality:
+    - Removing punctuation
+    - Removing stopwords (!under wrong assumption that all text is in english)
+
+Steps inspired from following blog:
+https://www.section.io/engineering-education/using-imbalanced-learn-to-handle-imbalanced-text-data/#prerequisites
+
+"""
+
+
+# removing punctuation
+def drop_punctuation(text):
+    return text.translate(str.maketrans("", "", string.punctuation))
+
+
+train_df["title_pre"] = train_df["title_low"].apply(lambda x: drop_punctuation(x))
+train_df["title_pre_len"] = train_df["title_pre"].apply(lambda x: len(x))
+# train_df.head(2)
+
+
+# removing stopwords wrong assumption all text in english
+def remove_stopwords(text):
+    removed = []
+    stop_words = list(stopwords.words("english"))
+    tokens = word_tokenize(text)
+    for i in range(len(tokens)):
+        if tokens[i] not in stop_words:
+            removed.append(tokens[i])
+    return " ".join(removed)
+
+
+train_df["title_n_stop_en"] = train_df["title_pre"].apply(lambda x: remove_stopwords(x))
+train_df["title_n_stop_en_len"] = train_df["title_n_stop_en"].apply(lambda x: len(x))
+# train_df.head(20)
+train_df.info()
+
+# extract preprocess train data as .json format
+# train_df.to_json('pre_train_df_j.json', orient='records', lines=True)

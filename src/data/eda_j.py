@@ -22,7 +22,7 @@ r_test_file = "add path to folder where you have stored the raw file"
 
 # raw data frames
 r_train_eda_df = pd.read_json(r_train_file)
-# r_test_eda_df = pd.read_json(r_test_file)
+r_test_eda_df = pd.read_json(r_test_file)
 
 
 # Descriptive analysis raw training dataset
@@ -57,8 +57,10 @@ print(r_train_eda_df["year"].value_counts())
 
 r_train_eda_df["year"].hist()
 
+
 ## Data cleaning
 train_df = r_train_eda_df
+test_df = r_test_eda_df
 
 # add lowercase columns of interest ['title', 'publisher', 'abstract']
 train_df["title_low"] = train_df["title"].str.lower()
@@ -86,6 +88,38 @@ print(train_df["abstract_len"].min())
 
 train_df.info()
 train_df.head(2)
+
+"""
+Similar steps for test dataset low values and len
+"""
+
+# add lowercase columns of interest ['title', 'publisher', 'abstract']
+test_df["title_low"] = test_df["title"].str.lower()
+test_df["publisher_low"] = test_df["publisher"].str.lower()
+test_df["abstract_low"] = test_df["abstract"].str.lower()
+
+# Replacing Null values to blank for ['abstract_low'], ['publisher_low'] to be able to check the length
+print(f"Original abstract col: {test_df['abstract'].isnull().sum()}\n")
+test_df["abstract_low"].fillna("", inplace=True)
+test_df["publisher_low"].fillna("", inplace=True)
+print(
+    f"After removing null values abstract_low col: {test_df['abstract_low'].isnull().sum()}"
+)
+# print(test_df[test_df['abstract_len']==0])
+
+# Adding columns lengths for title_low and abstract_low
+test_df["title_len"] = test_df["title_low"].apply(lambda x: len(x))
+test_df["abstract_len"] = test_df["abstract_low"].apply(lambda x: len(x))
+
+# Value range for columns ['title_low','abstract_low']
+print(test_df["title_len"].max())
+print(test_df["title_len"].min())
+print(test_df["abstract_len"].max())
+print(test_df["abstract_len"].min())
+
+
+test_df.info()
+test_df.head(2)
 
 
 """
@@ -117,6 +151,15 @@ train_df["abstract_pre"] = train_df["abstract_low"].apply(lambda x: drop_punctua
 train_df["abstract_pre_len"] = train_df["abstract_pre"].apply(lambda x: len(x))
 train_df.head(10)
 
+"""
+Similar steps test dataset preprocess punctuation remove 
+"""
+test_df["title_pre"] = test_df["title_low"].apply(lambda x: drop_punctuation(x))
+test_df["title_pre_len"] = test_df["title_pre"].apply(lambda x: len(x))
+test_df["abstract_pre"] = test_df["abstract_low"].apply(lambda x: drop_punctuation(x))
+test_df["abstract_pre_len"] = test_df["abstract_pre"].apply(lambda x: len(x))
+test_df.head(10)
+
 
 # removing stopwords wrong assumption all text in english
 def remove_stopwords(text):
@@ -145,7 +188,24 @@ train_df["abstract_n_stop_en_len"] = train_df["abstract_n_stop_en"].apply(
 )
 train_df.head(10)
 
+"""
+Similar step test dataset n_stop_en
+"""
+test_df["title_n_stop_en"] = test_df["title_pre"].apply(lambda x: remove_stopwords(x))
+test_df["title_n_stop_en_len"] = test_df["title_n_stop_en"].apply(lambda x: len(x))
+test_df["abstract_n_stop_en"] = test_df["abstract_pre"].apply(
+    lambda x: remove_stopwords(x)
+)
+test_df["abstract_n_stop_en_len"] = test_df["abstract_n_stop_en"].apply(
+    lambda x: len(x)
+)
+test_df.head(10)
+
 train_df.info()
+test_df.info()
 
 # train_df.info()
 # train_df.to_json('raw_train_eda_df_j.json', orient='records', lines=False)
+
+# test_df.info()
+# test_df.to_json('raw_test_eda_df_j.json', orient='records', lines=False)

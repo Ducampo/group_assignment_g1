@@ -1,9 +1,6 @@
 # %matplotlib inline # in case of working with jupyter notebook.
 
 
-# %matplotlib inline # in case of working with jupyter notebook.
-
-
 # import required libraries
 
 import pandas as pd
@@ -28,22 +25,17 @@ r_train_eda_df = pd.read_json(r_train_file)
 # r_test_eda_df = pd.read_json(r_test_file)
 
 
-# Descriptive view training dataset
+# Descriptive analysis raw training dataset
 r_train_eda_df.head()
 r_train_eda_df.shape
 r_train_eda_df.info()
+r_train_eda_df.describe()
 
 ## To be checked: https://www.kaggle.com/code/harshsingh2209/complete-guide-to-eda-on-text-data
 r_train_eda_df.isnull().sum()
 r_train_eda_df["title"][65909]
 print(r_train_eda_df.iloc[65909])
 
-
-## Descriptive analysis training dataset
-r_train_eda_df.head()
-r_train_eda_df.shape
-r_train_eda_df.info()
-r_train_eda_df.describe()
 
 # To be checked: https://www.kaggle.com/code/harshsingh2209/complete-guide-to-eda-on-text-data #https://www.section.io/engineering-education/using-imbalanced-learn-to-handle-imbalanced-text-data/#prerequisites
 r_train_eda_df.isnull().sum()
@@ -65,30 +57,36 @@ print(r_train_eda_df["year"].value_counts())
 
 r_train_eda_df["year"].hist()
 
-## data cleaning
+## Data cleaning
 train_df = r_train_eda_df
-
-print(f"Before null iputation: {train_df['abstract'].isnull().sum()}\n")
-# Replacing Null values to blank for abstract to be able to check the length
-train_df["abstract"].fillna("", inplace=True)
-print(train_df["abstract"].isnull().sum())
-# print(train_df[train_df['abstract_len']==0])
-
-# Adding columns lengths for title and abstract
-train_df["title_len"] = train_df["title"].apply(lambda x: len(x))
-train_df["abstract_len"] = train_df["abstract"].apply(lambda x: len(x))
-train_df.info()
-# Value range for columns ['title','abstract']
-print(train_df["title_len"].max())
-print(train_df["title_len"].min())
-print(train_df["abstract_len"].max())
-print(train_df["abstract_len"].min())
 
 # add lowercase columns of interest ['title', 'publisher', 'abstract']
 train_df["title_low"] = train_df["title"].str.lower()
 train_df["publisher_low"] = train_df["publisher"].str.lower()
 train_df["abstract_low"] = train_df["abstract"].str.lower()
-train_df.head(20)
+
+# Replacing Null values to blank for ['abstract_low'], ['publisher_low'] to be able to check the length
+print(f"Original abstract col: {train_df['abstract'].isnull().sum()}\n")
+train_df["abstract_low"].fillna("", inplace=True)
+train_df["publisher_low"].fillna("", inplace=True)
+print(
+    f"After removing null values abstract_low col: {train_df['abstract_low'].isnull().sum()}"
+)
+# print(train_df[train_df['abstract_len']==0])
+
+# Adding columns lengths for title_low and abstract_low
+train_df["title_len"] = train_df["title_low"].apply(lambda x: len(x))
+train_df["abstract_len"] = train_df["abstract_low"].apply(lambda x: len(x))
+
+# Value range for columns ['title_low','abstract_low']
+print(train_df["title_len"].max())
+print(train_df["title_len"].min())
+print(train_df["abstract_len"].max())
+print(train_df["abstract_len"].min())
+
+train_df.info()
+train_df.head(2)
+
 
 """
 Adding new temporary features:
@@ -115,7 +113,9 @@ Example of what drop_punctuation() fucntion does:
 
 train_df["title_pre"] = train_df["title_low"].apply(lambda x: drop_punctuation(x))
 train_df["title_pre_len"] = train_df["title_pre"].apply(lambda x: len(x))
-# train_df.head(2)
+train_df["abstract_pre"] = train_df["abstract_low"].apply(lambda x: drop_punctuation(x))
+train_df["abstract_pre_len"] = train_df["abstract_pre"].apply(lambda x: len(x))
+train_df.head(10)
 
 
 # removing stopwords wrong assumption all text in english
@@ -137,8 +137,15 @@ Example of what remove_stopwords() fucntion does
 
 train_df["title_n_stop_en"] = train_df["title_pre"].apply(lambda x: remove_stopwords(x))
 train_df["title_n_stop_en_len"] = train_df["title_n_stop_en"].apply(lambda x: len(x))
-# train_df.head(20)
+train_df["abstract_n_stop_en"] = train_df["abstract_pre"].apply(
+    lambda x: remove_stopwords(x)
+)
+train_df["abstract_n_stop_en_len"] = train_df["abstract_n_stop_en"].apply(
+    lambda x: len(x)
+)
+train_df.head(10)
+
 train_df.info()
 
-# extract preprocess train data as .json format
-# train_df.to_json('pre_train_df_j.json', orient='records', lines=False)
+# train_df.info()
+# train_df.to_json('raw_train_eda_df_j.json', orient='records', lines=False)

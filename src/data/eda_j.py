@@ -1,7 +1,7 @@
 # %matplotlib inline # in case of working with jupyter notebook.
 
 
-# Import required libraries
+# import required libraries
 
 import pandas as pd
 import numpy as np

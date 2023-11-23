@@ -29,6 +29,11 @@ import pyLDAvis.gensim
 
 stopwords = stopwords.words("english")
 
+# Set up script variables
+train_lda = "poc_feature_train_eda_j.json"
+test_lda = "poc_feature_test_eda_j.json"
+lda_model_path = "set up location of the train/test lda model"
+
 # Load datasets with the language detected currently available in data_raw branch:
 train_lda = "poc_feature_train_eda_j.json"
 test_lda = "poc_feature_test_eda_j.json"
@@ -154,5 +159,87 @@ lda_model = gensim.models.ldamodel.LdaModel(
     passes=10,
     alpha="auto",
 )
+# View 10 topics from the baseline lda model
+print(new_model.print_topics())
+doc_lda = new_model[corpus]
 
+"""
+Viz results from lda model training
+"""
+pyLDAvis.enable_notebook()
+vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word, mds="mmds", R=30)
+vis
+
+# Save trained model
 # lda_model.save("train_model.model")
+
+# Load existing model
+# new_model = gensim.models.ldamodel.LdaModel.load(lda_model_path)
+
+"""
+Feature enrichment
+"""
+
+
+# Test example on unseen data
+test_doc = corpus[-1]
+
+
+vector = new_model[test_doc]
+print(vector)
+
+
+# Sort topics based on higher belonging value. (Topics are stored as follow (1, 0.023) where 1 = Topic and 0.023 grade of belonging)
+def Sort(sub_li):
+    sub_li.sort(key=lambda x: x[1])
+    sub_li.reverse()
+    return sub_li
+
+
+# Function that selects the topic with the highest belonging grade
+def Select_topic(sort_topic):
+    return sort_topic[0][0]
+
+
+new_vector = Select_topic(Sort(vector))
+print(new_vector)
+
+# Store values in our sample data frame to be able to further test results on training models.
+
+sample_data["test_topic"] = sample_data["lda_base_topics"].apply(
+    lambda x: Select_topic(Sort(x))
+)
+
+# Adding corpus to english subset from training dataset.
+print(len(corpus))
+sample_data["lda_base_corpus"] = corpus
+print(corpus[0])
+sample_data["lda_base_corpus"][0]
+
+# Adding topics from lda baseline model to english subset from training dataset.
+sample_data["lda_base_topics"] = doc_lda
+sample_data["test_topic"] = sample_data["lda_base_topics"].apply(
+    lambda x: Select_topic(Sort(x))
+)
+
+# review topic distribution per paper.
+
+sample_data["test_topic"].value_counts()
+sample_data.head()
+
+# Save sample english lda model dataframe
+sample_data.to_json("train_base_lda_en_topics.json", orient="records", lines=False)
+
+
+"""
+!NOTE WIP Model Hyperparameter tuning and validation score 
+"""
+
+from gensim.models import CoherenceModel
+
+# Compute Coherence Score
+coherence_model_lda = CoherenceModel(
+    model=new_model, texts=data_bigrams_trigrams, dictionary=id2word, coherence="c_v"
+)
+coherence_lda = coherence_model_lda.get_coherence()
+print("Coherence Score: ", coherence_lda)

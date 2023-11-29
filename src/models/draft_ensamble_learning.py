@@ -34,18 +34,10 @@ from matplotlib import pyplot
 # get the dataset
 def get_dataset():
     train = pd.DataFrame.from_records(
-        json.load(
-            open(
-                "/content/drive/MyDrive/880083-M-6 Machine Learning/Assignments/data/poc_feature_train_eda_lan_j.json"
-            )
-        )
+        json.load(open("poc_feature_train_eda_j.json"))
     ).fillna("")
     test = pd.DataFrame.from_records(
-        json.load(
-            open(
-                "/content/drive/MyDrive/880083-M-6 Machine Learning/Assignments/data/poc_feature_test_eda_lan_j.json"
-            )
-        )
+        json.load(open("poc_feature_test_eda_j.json"))
     ).fillna("")
     train, val = train_test_split(train, stratify=train["year"], random_state=123)
     X = train.drop("year", axis=1)

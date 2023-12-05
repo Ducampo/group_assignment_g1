@@ -238,7 +238,7 @@ def extract_df_metadata(df):
     return metadata_df
 
 
-extract_df_metadata(feature_df)
+extract_df_metadata(pre_train_df)
 
 # export dataframe to json file
 # feature_df.to_json('poc_feature_df_j.json', orient='records', lines=False)
